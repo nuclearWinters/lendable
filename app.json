@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.nuclearwinters.lendable4"
     },
     "web": {
       "output": "static",
@@ -34,11 +35,51 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      [
+        "expo-font",
+        {
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Open Sans",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/OpenSans-Light.ttf",
+                    "weight": 300
+                  },
+                  {
+                    "path": "./assets/fonts/OpenSans-Regular.ttf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./assets/fonts/OpenSans-SemiBold.ttf",
+                    "weight": 600
+                  }
+                ]
+              }
+            ]
+          },
+          "ios": {
+            "fonts": [
+              "./assets/fonts/OpenSans-Light.ttf",
+              "./assets/fonts/OpenSans-Regular.ttf",
+              "./assets/fonts/OpenSans-SemiBold.ttf"
+            ]
+          }
+        }
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "af837177-2c81-4155-a418-5d4b952a23fc"
+      }
     }
   }
 }

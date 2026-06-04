@@ -1,0 +1,46 @@
+appId: com.nuclearwinters.lendable4
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "Get your quote »"
+- assertVisible: "I want to borrow"
+- assertVisible: "over"
+- assertVisible: "Interest rate"
+- assertVisible: "Monthly repayment"
+- assertVisible: "£7,500.00"
+- assertVisible: "3 years"
+- assertVisible: "10%"
+- assertVisible: "£242"
+- tapOn: "Get your quote »"
+- swipe:
+    from:
+      id: "loan-amount-slider"
+    direction: LEFT
+- swipe:
+    from:
+      id: "loan-term-slider"
+    direction: LEFT
+- assertVisible: "£1,000.00"
+- assertVisible: "1 year"
+- assertVisible: "5%"
+- assertVisible: "£86"
+- swipe:
+    from:
+      id: "loan-amount-slider"
+    direction: RIGHT
+- swipe:
+    from:
+      id: "loan-term-slider"
+    direction: RIGHT
+- assertVisible: "£20,000.00"
+- assertVisible: "5 years"
+- assertVisible: "20%"
+- assertVisible: "£530"
+- stopApp
+- launchApp:
+    clearState: false
+- assertVisible: "£20,000.00"
+- assertVisible: "5 years"
+- assertVisible: "20%"
+- assertVisible: "£530"

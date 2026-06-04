@@ -1,56 +1,100 @@
-# Welcome to your Expo app 👋
+# Loan Calculator
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native app built with Expo that lets users calculate loan repayments via two interactive sliders.
 
-## Get started
+## Requirements
 
-1. Install dependencies
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- Android Emulator (via Android Studio), or a physical device
 
-   ```bash
-   npm install
-   ```
+## Getting started
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Install dependencies:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Note:** this app uses native modules (`expo-secure-store`, `@react-native-community/slider`) and cannot run in Expo Go. A development build is required.
 
-### Other setup steps
+**Option 1 — pre-built APK (quickest)**
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Install this APK on your Android device or emulator:
+https://expo.dev/accounts/nuclearwinters/projects/lendable4/builds/c7d47f09-19d1-4f49-b4f1-1d84bec62039
 
-## Learn more
+Then start the dev server and press `a`:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx expo start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+**Option 2 — local build**
 
-## Join the community
+Follow the [local development build guide](https://docs.expo.dev/get-started/set-up-your-environment/?mode=development-build&buildEnv=local), then run:
 
-Join our community of developers creating universal apps.
+```bash
+npx expo run:android
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Running tests
+
+### Unit tests (Jest)
+
+```bash
+npm test
+```
+
+To run in watch mode:
+
+```bash
+npm test -- --watch
+```
+
+### End-to-end tests (Maestro)
+
+Maestro tests require the app to be running on a simulator or physical device first.
+
+Install the Maestro CLI if you haven't already:
+
+Follow these instructions to install the Maestro CLI: https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli
+
+Then, with the app open on a simulator or device, run:
+
+```bash
+maestro test .maestro/lendable.yaml
+```
+
+The flow launches the app, asserts default values, swipes both sliders to their extremes, verifies the displayed values at each end, and checks that the last slider positions are restored after relaunching.
+
+## Architecture
+
+```
+src/
+  app/
+    _layout.tsx        # Root layout (fonts, splash screen)
+    index.tsx          # Main screen — sliders and results
+  components/
+    AppGradient.tsx    # Background gradient wrapper
+    LabelRow.tsx       # Slider label + value row
+    StatItem.tsx       # Interest rate / monthly repayment display
+    ThemedText.tsx     # Text with theme-aware styles
+  constants/
+    calculator.ts      # Slider bounds, defaults, storage keys
+    theme.ts           # Colours
+  hooks/
+    use-theme-color.ts # Light/dark colour resolution
+  utils/
+    calculator.ts      # Pure functions: interest rate, repayment formula, formatters
+  __tests__/           # Unit and integration tests
+```
+
+The calculator logic lives entirely in `src/utils/calculator.ts` as pure functions, making it straightforward to test independently of the UI. The main screen (`index.tsx`) owns the slider state, derives all display values from it, and persists selections to `expo-secure-store` so the user's last values are restored on next launch.
+
+## Decisions and trade-offs
+
+- **Slider library** — used `@react-native-community/slider` for native feel on both platforms. Good compatibility with Maestro but missing props to modify the horizontal progress line.
+- **Term representation** — the term slider uses integer steps (2–10) representing half-year increments internally, then formats them as `1 year`, `1½ years`, etc. for display. This help us create simple calculations during render.
+- **Monthly repayment formula** — standard amortisation: `P × (r(1+r)^n) / ((1+r)^n − 1)` where `r` is the monthly rate and `n` is the number of months.
+- **Persistence** — `expo-secure-store` is used to save slider values between sessions. `SecureStore.getItem` (synchronous) is called inside the `useState` initialiser to avoid a flash of default values.
+- **No navigation** — the exercise calls for a single screen, so `expo-router` is used minimally just as the project's entry point.

@@ -1,98 +1,166 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { AppGradient } from "@/components/AppGradient";
+import { LabelRow } from "@/components/LabelRow";
+import { StatItem } from "@/components/StatItem";
+import { ThemedText } from "@/components/ThemedText";
+import {
+  DEFAULT_LOAN_AMOUNT,
+  DEFAULT_LOAN_TERM,
+  LOAN_MAX,
+  LOAN_MIN,
+  SLIDER_THUMB_COLOR,
+  SLIDER_THUMB_SIZE,
+  SLIDER_TRACK_COLOR,
+  STORAGE_KEY_AMOUNT,
+  STORAGE_KEY_TERM,
+  TERM_MAX, TERM_MIN
+} from "@/constants/calculator";
+import { Colors } from "@/constants/theme";
+import {
+  calcMonthlyRepayment,
+  getInterestRate,
+  poundsFormatter,
+  poundsFormatterWhole,
+} from "@/utils/calculator";
+import Slider from "@react-native-community/slider";
+import * as SecureStore from "expo-secure-store";
+import { useCallback, useMemo, useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+  const [loanAmount, setLoanAmount] = useState(() => {
+    const stored = SecureStore.getItem(STORAGE_KEY_AMOUNT);
+    return stored ? Number(stored) : DEFAULT_LOAN_AMOUNT;
+  });
+  const [loanTerm, setLoanTerm] = useState(() => {
+    const stored = SecureStore.getItem(STORAGE_KEY_TERM);
+    return stored ? Number(stored) : DEFAULT_LOAN_TERM;
+  });
+
+  const loanTermYears = Math.floor(loanTerm / 2);
+  const loanTermFraction = loanTerm % 2 ? "½" : "";
+  const termPlural = loanTermYears === 1 && !loanTermFraction ? "year" : "years";
+  const termLabel = `${loanTermYears}${loanTermFraction} ${termPlural}`;
+
+  const interestRate = getInterestRate(loanAmount);
+  const months = loanTerm * 6;
+
+  const monthlyRepayment = useMemo(
+    () => calcMonthlyRepayment(loanAmount, months, interestRate),
+    [loanAmount, months, interestRate]
+  );
+
+  const onLoanAmountChange = useCallback((value: number) => {
+    setLoanAmount(value);
+  }, []);
+
+  const onLoanAmountComplete = useCallback((value: number) => {
+    SecureStore.setItemAsync(STORAGE_KEY_AMOUNT, String(value));
+  }, []);
+
+  const onLoanTermChange = useCallback((value: number) => {
+    setLoanTerm(value);
+  }, []);
+
+  const onLoanTermComplete = useCallback((value: number) => {
+    SecureStore.setItemAsync(STORAGE_KEY_TERM, String(value));
+  }, []);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <AppGradient style={styles.gradient}>
+          <View style={styles.card}>
+            <LabelRow
+              label="I want to borrow"
+              value={poundsFormatter.format(loanAmount)}
+            />
+            <Slider
+              testID="loan-amount-slider"
+              value={loanAmount}
+              onValueChange={onLoanAmountChange}
+              onSlidingComplete={onLoanAmountComplete}
+              style={styles.slider}
+              step={1}
+              minimumValue={LOAN_MIN}
+              maximumValue={LOAN_MAX}
+              minimumTrackTintColor={SLIDER_TRACK_COLOR}
+              maximumTrackTintColor={SLIDER_TRACK_COLOR}
+              thumbTintColor={SLIDER_THUMB_COLOR}
+              thumbSize={SLIDER_THUMB_SIZE}
+            />
+            <LabelRow label="over" value={termLabel} />
+            <Slider
+              testID="loan-term-slider"
+              value={loanTerm}
+              onValueChange={onLoanTermChange}
+              onSlidingComplete={onLoanTermComplete}
+              style={styles.slider}
+              step={1}
+              minimumValue={TERM_MIN}
+              maximumValue={TERM_MAX}
+              minimumTrackTintColor={SLIDER_TRACK_COLOR}
+              maximumTrackTintColor={SLIDER_TRACK_COLOR}
+              thumbTintColor={SLIDER_THUMB_COLOR}
+              thumbSize={SLIDER_THUMB_SIZE}
+            />
+            <View style={styles.statsRow}>
+              <StatItem value={`${interestRate}%`} label="Interest rate" />
+              <StatItem
+                value={poundsFormatterWhole.format(monthlyRepayment)}
+                label="Monthly repayment"
+              />
+            </View>
+          </View>
+        </AppGradient>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <View style={styles.ctaContainer}>
+          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+            <ThemedText type="button">Get your quote »</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  container: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
   },
-  title: {
-    textAlign: 'center',
+  gradient: {
+    flex: 1,
+    justifyContent: "center",
   },
-  code: {
-    textTransform: 'uppercase',
+  card: {
+    backgroundColor: Colors.light.background,
+    marginHorizontal: 28,
+    borderRadius: 8,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+    paddingBottom: 16,
+    gap: 8,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  slider: {
+    width: "100%",
+    height: 40,
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 24,
+    paddingHorizontal: 14,
+  },
+  ctaContainer: {
+    padding: 40,
+  },
+  ctaButton: {
+    backgroundColor: Colors.light.gradientTwo,
+    padding: 20,
+    borderRadius: 8,
+    alignItems: "center",
   },
 });

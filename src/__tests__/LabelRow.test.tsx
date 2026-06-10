@@ -21,4 +21,9 @@ describe('LabelRow', () => {
     rerender(<LabelRow label="Amount" value="£5,000" />);
     expect(getByText('£5,000')).toBeTruthy();
   });
+
+  it('has a combined accessibility label', () => {
+    render(<LabelRow label="I want to borrow" value="£7,500" />);
+    expect(screen.getByLabelText('I want to borrow £7,500')).toBeTruthy();
+  });
 });

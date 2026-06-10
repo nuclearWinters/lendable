@@ -88,6 +88,14 @@ export default function HomeScreen() {
               maximumTrackTintColor={SLIDER_TRACK_COLOR}
               thumbTintColor={SLIDER_THUMB_COLOR}
               thumbSize={SLIDER_THUMB_SIZE}
+              accessibilityLabel="Loan amount"
+              accessibilityHint="Swipe to adjust the loan amount"
+              accessibilityValue={{
+                min: LOAN_MIN,
+                max: LOAN_MAX,
+                now: loanAmount,
+                text: poundsFormatter.format(loanAmount),
+              }}
             />
             <LabelRow label="over" value={termLabel} />
             <Slider
@@ -103,6 +111,14 @@ export default function HomeScreen() {
               maximumTrackTintColor={SLIDER_TRACK_COLOR}
               thumbTintColor={SLIDER_THUMB_COLOR}
               thumbSize={SLIDER_THUMB_SIZE}
+              accessibilityLabel="Loan term"
+              accessibilityHint="Swipe to adjust the loan term"
+              accessibilityValue={{
+                min: TERM_MIN,
+                max: TERM_MAX,
+                now: loanTerm,
+                text: termLabel,
+              }}
             />
             <View style={styles.statsRow}>
               <StatItem value={`${interestRate}%`} label="Interest rate" />
@@ -115,7 +131,12 @@ export default function HomeScreen() {
         </AppGradient>
 
         <View style={styles.ctaContainer}>
-          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.ctaButton}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Get your quote"
+          >
             <ThemedText type="button">Get your quote »</ThemedText>
           </TouchableOpacity>
         </View>

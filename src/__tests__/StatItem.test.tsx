@@ -22,4 +22,9 @@ describe('StatItem', () => {
     rerender(<StatItem value="£200" label="Monthly" />);
     expect(getByText('£200')).toBeTruthy();
   });
+
+  it('has a combined accessibility label', () => {
+    render(<StatItem value="10%" label="Interest rate" />);
+    expect(screen.getByLabelText('Interest rate: 10%')).toBeTruthy();
+  });
 });

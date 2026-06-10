@@ -12,6 +12,11 @@ appId: com.nuclearwinters.lendable4
 - assertVisible: "3 years"
 - assertVisible: "10%"
 - assertVisible: "£242"
+- assertScreenshot:
+    path: default-state.png
+    thresholdPercentage: 100
+    label: "Default state matches baseline"
+
 - tapOn: "Get your quote »"
 - swipe:
     from:
@@ -25,6 +30,11 @@ appId: com.nuclearwinters.lendable4
 - assertVisible: "1 year"
 - assertVisible: "5%"
 - assertVisible: "£86"
+- assertScreenshot:
+    path: minimum-values.png
+    thresholdPercentage: 100
+    label: "Minimum values match baseline"
+
 - swipe:
     from:
       id: "loan-amount-slider"
@@ -37,6 +47,11 @@ appId: com.nuclearwinters.lendable4
 - assertVisible: "5 years"
 - assertVisible: "20%"
 - assertVisible: "£530"
+- assertScreenshot:
+    path: maximum-values.png
+    thresholdPercentage: 100
+    label: "Maximum values match baseline"
+
 - stopApp
 - launchApp:
     clearState: false
@@ -44,3 +59,7 @@ appId: com.nuclearwinters.lendable4
 - assertVisible: "5 years"
 - assertVisible: "20%"
 - assertVisible: "£530"
+- assertScreenshot:
+    path: restored-state.png
+    thresholdPercentage: 100
+    label: "Restored state matches baseline"

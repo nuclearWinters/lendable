@@ -5,7 +5,11 @@ type Props = { value: string; label: string };
 
 export function StatItem({ value, label }: Props) {
   return (
-    <View style={styles.item}>
+    <View
+      style={styles.item}
+      accessible={true}
+      accessibilityLabel={`${label}: ${value}`}
+    >
       <ThemedText type="statValue">{value}</ThemedText>
       <ThemedText type="statTitle">{label}</ThemedText>
     </View>

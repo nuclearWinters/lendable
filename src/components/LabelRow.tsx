@@ -5,7 +5,11 @@ type Props = { label: string; value: string };
 
 export function LabelRow({ label, value }: Props) {
   return (
-    <View style={styles.row}>
+    <View
+      style={styles.row}
+      accessible={true}
+      accessibilityLabel={`${label} ${value}`}
+    >
       <ThemedText type="labelTitle">{label}</ThemedText>
       <ThemedText type="labelValue">{value}</ThemedText>
     </View>
